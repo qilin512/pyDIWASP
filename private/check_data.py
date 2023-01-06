@@ -149,7 +149,7 @@ def check_data(DDS, type_):
         else:
             DDS['smooth'] = 'ON'
         
-        if 'method' not in DDS:
+        if 'method' in DDS:
             if DDS['method'].upper() not in ('DFTM', 'EMLM', 'IMLM', 'EMEP',
                 'BDM'):
                 error = 'method'

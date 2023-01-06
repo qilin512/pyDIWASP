@@ -9,10 +9,12 @@ from writespec import writespec
 from plotspec import plotspec
 from private.velx import velx
 from private.vely import vely
+from private.velz import velz
 from private.pres import pres
 from private.elev import elev
 from private.wavenumber import wavenumber
 from private.IMLM import IMLM
+from private.DFTM import DFTM
 from private.smoothspec import smoothspec
 from private.diwasp_csd import diwasp_csd
 from private.check_data import check_data
@@ -52,9 +54,9 @@ def dirspec(ID, SM, EP, Options_=None):
     Field Research Facility, US Army Corps of Engineers
     """
 
-    Options = {'MESSAGE':1, 'PLOTTYPE':1, 'FILEOUT':''}
+    Options = {'MESSAGE': 1, 'PLOTTYPE': 2, 'FILEOUT': ''}
 
-    nopts = len(Options_)
+    nopts = 0 if Options_ is None else len(Options_)
 
     ID = check_data(ID, 1); 
     if len(ID) == 0: return [], []
@@ -81,12 +83,12 @@ def dirspec(ID, SM, EP, Options_=None):
     ndat, szd = np.shape(ID['data'])
 
     #get resolution of FFT - if not specified, calculate a sensible value
-    if len(EP['nfft']) == 0:
+    if EP['nfft'] == 0:
         nfft = int(2 ** (8 + np.round(np.log2(ID['fs']))))
         EP['nfft'] = nfft
     else:
         nfft = int(EP['nfft'])
-    if nfft > ndat: raise Exception('Data length of {} too small'.format(dat))
+    if nfft > ndat: raise Exception('Data length of {} too small'.format(ndat))
 
     #calculate the cross-power spectra
     xps = np.empty((szd, szd, int(nfft / 2)), 'complex128')
@@ -103,7 +105,7 @@ def dirspec(ID, SM, EP, Options_=None):
 
     #calculate transfer parameters
     print('transfer parameters\n')
-    trm = np.empty((szd, nf, len(pidirs)))
+    trm = np.empty((szd, nf, len(pidirs)), dtype='complex128')
     kx = np.empty((szd, szd, nf, len(pidirs)))
     for m in range(szd):
         trm[m, :, :] = eval(ID['datatypes'][m])(2 * np.pi * F, pidirs, wns, 
@@ -119,7 +121,7 @@ def dirspec(ID, SM, EP, Options_=None):
         Sxps = xps[m, m, :]
         Ss[m, :] = Sxps / (np.max(tfn, axis=1) * np.conj(np.max(tfn, axis=1)))
     
-    ffs = np.logical_and(F >= np.min(SM['freqs']), F <= np.max(SM['freqs']))
+    ffs = np.logical_and(F >= np.min(SM['freqs']), F <= np.max(SM['freqs'])+0.00001)
     SM1 = dict()
     SM1['freqs'] = F[ffs]
     SM1['funit'] = 'Hz'
@@ -147,7 +149,7 @@ def dirspec(ID, SM, EP, Options_=None):
     filename = Options['FILEOUT']
     if len(filename) > 0:
         print('writing out spectrum matrix to file')
-        writespec(SMout,filename)
+        writespec(SMout, filename)
 
     #plot spectrum
     if ptype > 0:
