@@ -12,6 +12,9 @@ from .private.vely import vely
 from .private.velz import velz
 from .private.pres import pres
 from .private.elev import elev
+from .private.accx import accx
+from .private.accy import accy
+from .private.accz import accz
 from .private.wavenumber import wavenumber
 from .private.IMLM import IMLM
 from .private.DFTM import DFTM
@@ -54,7 +57,7 @@ def dirspec(ID, SM, EP, Options_=None):
     Field Research Facility, US Army Corps of Engineers
     """
 
-    Options = {'MESSAGE': 1, 'PLOTTYPE': 2, 'FILEOUT': ''}
+    Options = {'MESSAGE': 1, 'PLOTTYPE': 0, 'FILEOUT': ''}
 
     nopts = 0 if Options_ is None else len(Options_)
 
